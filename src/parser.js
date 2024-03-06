@@ -372,25 +372,8 @@ export class essayCodeParser {
         this.countFormula = 0;
         this.countCode = 0;
         this.countInlineCode = 0;
-        this.currentFontStyle = new Array();
-        this.currentFontStyle[0] = this.defaultFontStyle[0];
-        this.currentFontStyle[1] = this.defaultFontStyle[1];
-        this.currentFontStyle[2] = this.defaultFontStyle[2];
-        this.currentFontStyle[3] = this.defaultFontStyle[3];
-        this.currentFontStyle[4] = this.defaultFontStyle[4];
-        this.currentFontStyle[5] = this.defaultFontStyle[5];
-        let lastfontstyle =
-            "font-size:" +
-            this.currentFontStyle[0] +
-            ";font-weight:" +
-            this.currentFontStyle[1] +
-            ";color:" +
-            this.currentFontStyle[2] +
-            ";text-decoration:" +
-            this.currentFontStyle[4] +
-            ";font-family:" +
-            this.currentFontStyle[5] +
-            ";";
+        this.currentFontStyle= this.defaultFontStyle.copy();
+        let lastfontstyle = this.currentFontStyle.generateCSSString();
         this.inlabelstyle = lastfontstyle.replace(/\"/, "&quot;");
         //protects formulas and codes
         //str = str.replace(/`[\s\S]*?`/g, this.inlineprocessor);
