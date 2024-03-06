@@ -1,0 +1,10 @@
+{
+  "name": "essaycodeparser",
+  "version": "2.0.0",
+  "description": "New Generation of EssayCodeParser",
+  "main": "parser.js",
+  "devDependencies": {
+  },
+  "author": "TSStudio",
+  "license": "GNU GPLv3"
+}
