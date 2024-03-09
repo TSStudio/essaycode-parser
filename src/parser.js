@@ -141,7 +141,7 @@ class inlineCode extends abstractSpan {
         this.content = content;
     }
 }
-class inlineFormula extends abstractSpan {
+class formula extends abstractSpan {
     content;
     constructor(content) {
         this.content = content;
@@ -207,12 +207,6 @@ class blockCode extends abstractParagraphBlock {
     constructor(type, language, content) {
         this.type = type;
         this.language = language;
-        this.content = content;
-    }
-}
-class blockFormula extends abstractParagraphBlock {
-    content = "";
-    constructor(content) {
         this.content = content;
     }
 }
