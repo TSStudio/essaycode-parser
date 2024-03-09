@@ -216,8 +216,38 @@ class blockFormula extends abstractParagraphBlock {
         this.content = content;
     }
 }
-class title extends abstractParagraphBlock {}
-class smallTitle extends abstractParagraphBlock {}
+class title extends abstractParagraphBlock {
+    content = "";
+    constructor(content) {
+        this.content = content;
+    }
+    generateHTML() {
+        return "<center><h1>" + this.content + "</h1></center>";
+    }
+    generateDOMElem() {
+        let elem = document.createElement("center");
+        let elem2 = document.createElement("h1");
+        elem2.innerHTML = this.content;
+        elem.appendChild(elem2);
+        return elem;
+    }
+}
+class smallTitle extends abstractParagraphBlock {
+    content = "";
+    constructor(content) {
+        this.content = content;
+    }
+    generateHTML() {
+        return "<center><h3>" + this.content + "</h3></center>";
+    }
+    generateDOMElem() {
+        let elem = document.createElement("center");
+        let elem2 = document.createElement("h1");
+        elem2.innerHTML = this.content;
+        elem.appendChild(elem2);
+        return elem;
+    }
+}
 
 class div {
     paragraphs = [];
