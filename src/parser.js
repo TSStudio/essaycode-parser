@@ -111,6 +111,33 @@ export class divStyle {
         return new divStyle(this.backgroundColor, this.padding, this.margin);
     }
 }
+
+const defaultCodeStyle = {
+    display: "inline-block",
+    backgroundColor: "#eeeeee",
+    color: "#020202",
+    border: "1px solid black",
+    fontFamily: "Consolas,Courier New",
+    textIndent: "0",
+    generateCSSString() {
+        return (
+            "display:" +
+            this.display +
+            ";background-color:" +
+            this.backgroundColor +
+            ";color:" +
+            this.color +
+            ";border:" +
+            this.border +
+            ";font-family:" +
+            this.fontFamily +
+            ";text-indent:" +
+            this.textIndent +
+            ";"
+        );
+    },
+};
+
 class abstractSpan {}
 class span extends abstractSpan {
     content;
@@ -137,14 +164,46 @@ class span extends abstractSpan {
 }
 class inlineCode extends abstractSpan {
     content;
-    constructor(content) {
+    codeStyle;
+    constructor(content, codeStyle = defaultCodeStyle) {
         this.content = content;
+        this.codeStyle = codeStyle;
+    }
+    generateHTML() {
+        return (
+            "<span style='" +
+            this.codeStyle.generateCSSString() +
+            "'>" +
+            this.content +
+            "</span>"
+        );
+    }
+    generateDOMElem() {
+        let elem = document.createElement("span");
+        elem.style = this.codeStyle.generateCSSString();
+        elem.innerHTML = this.content;
+        return elem;
     }
 }
 class formula extends abstractSpan {
     content;
     constructor(content) {
         this.content = content;
+    }
+    generateHTML() {
+        return (
+            "<span style='" +
+            this.fontstyle.generateCSSString() +
+            "'>" +
+            this.content +
+            "</span>"
+        );
+    }
+    generateDOMElem() {
+        let elem = document.createElement("span");
+        elem.style = this.fontstyle.generateCSSString();
+        elem.innerHTML = this.content;
+        return elem;
     }
 }
 class image extends abstractSpan {
@@ -153,6 +212,7 @@ class image extends abstractSpan {
     alt;
     constructor(src, relativeSize, alt) {
         this.src = src;
+        this.relativeSize = relativeSize;
         this.alt = alt;
     }
     generateHTML() {
@@ -208,6 +268,24 @@ class blockCode extends abstractParagraphBlock {
         this.type = type;
         this.language = language;
         this.content = content;
+    }
+    generateHTML() {
+        return (
+            '<pre style="width:100%;overflow-x:auto;"><code class="language-' +
+            this.language +
+            ">" +
+            this.content +
+            "</code></pre>"
+        );
+    }
+    generateDOMElem() {
+        let elem = document.createElement("pre");
+        elem.style = "width:100%;overflow-x:auto;";
+        let elem2 = document.createElement("code");
+        elem2.classList.add("language-" + this.language);
+        elem2.innerHTML = this.content;
+        elem.appendChild(elem2);
+        return elem;
     }
 }
 class title extends abstractParagraphBlock {
