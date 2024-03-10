@@ -137,6 +137,7 @@ const defaultCodeStyle = {
         );
     },
 };
+const defaultDivStyle = new divStyle();
 
 class abstractSpan {}
 class span extends abstractSpan {
@@ -321,10 +322,35 @@ class smallTitle extends abstractParagraphBlock {
     }
 }
 
-class div {
+class div extends abstractParagraphBlock {
     paragraphs = [];
-    constructor(textAlignment) {
-        this.textAlignment = textAlignment;
+    divStyle;
+    constructor(divStyle = defaultDivStyle) {
+        this.divStyle = divStyle;
+    }
+    pushParagraph(paragraph) {
+        this.paragraphs.push(paragraph);
+    }
+    generateHTML() {
+        let html = "";
+        for (let i = 0; i < this.paragraphs.length; i++) {
+            html += this.paragraphs[i].generateHTML();
+        }
+        return (
+            '<div style="' +
+            this.divStyle.generateCSSString() +
+            '">' +
+            html +
+            "</div>"
+        );
+    }
+    generateDOMElem() {
+        let elem = document.createElement("div");
+        for (let i = 0; i < this.paragraphs.length; i++) {
+            elem.appendChild(this.paragraphs[i].generateDOMElem());
+        }
+        elem.style = this.divStyle.generateCSSString();
+        return elem;
     }
 }
 
