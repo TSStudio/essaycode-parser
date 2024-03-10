@@ -139,7 +139,9 @@ const defaultCodeStyle = {
 };
 const defaultDivStyle = new divStyle();
 
-class abstractSpan {}
+class abstractSpan {
+    parent;
+}
 class span extends abstractSpan {
     content;
     fontstyle;
@@ -235,7 +237,9 @@ class image extends abstractSpan {
         return elem;
     }
 }
-class abstractParagraphBlock {}
+class abstractParagraphBlock {
+    parent;
+}
 class paragraph extends abstractParagraphBlock {
     textAlignment;
     spans = [];
@@ -262,7 +266,6 @@ class paragraph extends abstractParagraphBlock {
     }
 }
 class blockCode extends abstractParagraphBlock {
-    type = ""; //inline or block
     language = "";
     content = "";
     constructor(type, language, content) {
@@ -322,10 +325,11 @@ class smallTitle extends abstractParagraphBlock {
     }
 }
 
-class div extends abstractParagraphBlock {
+class div {
     paragraphs = [];
+    parent;
     divStyle;
-    constructor(divStyle = defaultDivStyle) {
+    constructor(divStyle = defaultDivStyle, parent = null) {
         this.divStyle = divStyle;
     }
     pushParagraph(paragraph) {
@@ -354,6 +358,16 @@ class div extends abstractParagraphBlock {
     }
 }
 
+const codeRegExp = /\\CODE[\s\S]*?\\CODE/g;
+const allSequenceRegExp = /(\\[a-zA-Z-\\]+(\([\s\S]*?\))?)|(\$)|(`)/g;
 export class essayCodeParser {
-    parse(essayCode) {}
+    parse(essayCode) {
+        controlSequences = [];
+        let result = allSequenceRegExp.exec(essayCode);
+        let currentParagraph = null;
+        let currentSpan = null;
+        let currentDiv = null;
+        isInCode = false;
+        isInFormula = false;
+    }
 }
