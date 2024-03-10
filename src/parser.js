@@ -363,11 +363,36 @@ const allSequenceRegExp = /(\\[a-zA-Z-\\]+(\([\s\S]*?\))?)|(\$)|(`)/g;
 export class essayCodeParser {
     parse(essayCode) {
         controlSequences = [];
-        let result = allSequenceRegExp.exec(essayCode);
         let currentParagraph = null;
         let currentSpan = null;
         let currentDiv = null;
-        isInCode = false;
-        isInFormula = false;
+        let isInCode = false;
+        let codeBegins = 0;
+        let isInInlineCode = false;
+        let inlineCodeBegins = 0;
+        let isInFormula = false;
+        while ((result = allSequenceRegExp.exec(essayCode))) {
+            if (isInCode) {
+                if (result[0] == "\\CODE") {
+                    isInCode = false;
+                    let code = essayCode.substring(codeBegins, result.index);
+                    currentParagraph.content = code;
+                    currentParagraph = null;
+                }
+                continue;
+            }
+            if (isInInlineCode) {
+                if (result[0] == "`") {
+                    isInInlineCode = false;
+                    let code = essayCode.substring(
+                        inlineCodeBegins,
+                        result.index
+                    );
+                    currentSpan.content = code;
+                    currentSpan = null;
+                }
+                continue;
+            }
+        }
     }
 }
