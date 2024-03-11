@@ -48,8 +48,8 @@ export class essayCodeParser {
         if (spanBegin == spanEnd - 1) return;
         if (/^\s*$/.test(this.essayCode[spanBegin])) return;
         let spanContent = this.essayCode.substring(spanBegin, spanEnd);
-        let span = new span(spanContent, this.currentFontStyle.copy());
-        this.pushToParagraph(span);
+        let spanCl = new span(spanContent, this.currentFontStyle.copy());
+        this.pushToParagraph(spanCl);
     }
 
     parse(essayCode) {
