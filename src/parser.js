@@ -444,6 +444,24 @@ export class essayCodeParser {
                 this.pushToParagraph(this.currentSpan);
                 continue;
             }
+            if (result[0] == "$" || result[0] == "$$") {
+                if (isInFormula) {
+                    isInFormula = false;
+                    let formula = essayCode.substring(
+                        spanBegin,
+                        result.index + result[0].length
+                    );
+                    this.currentSpan.content = formula;
+                    this.currentSpan = null;
+                    spanBegin = result.index + result[0].length;
+                    continue;
+                }
+                this.processCurrentSpan(spanBegin, result.index);
+                this.currentSpan = new formula("");
+                this.pushToParagraph(this.currentSpan);
+                spanBegin = result.index;
+                continue;
+            }
         }
     }
 }
