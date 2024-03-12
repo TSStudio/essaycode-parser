@@ -2,14 +2,11 @@ import {
     fontStyle,
     divStyle,
     defaultCodeStyle,
-    defaultDivStyle,
-    abstractSpan,
     br,
     span,
     inlineCode,
     formula,
     image,
-    abstractParagraphBlock,
     paragraph,
     blockCode,
     title,
@@ -17,9 +14,8 @@ import {
     div,
 } from "./class_defines";
 
-const essayCodeParserVersion = "2.0.0";
+const essayCodeParserVersion = "2.0.2";
 const essayCodeVersion = "1.1";
-const lastfontstyle = "";
 
 const codeRegExp = /^\\CODE(\([a-zA-Z-]*\))?$/;
 const codeWithLanguageRegExp = /^\\CODE\([a-zA-Z-]+\)$/;
@@ -30,6 +26,8 @@ const titleRegExp = /\\title\(([\s\S]*)\)/;
 const smallTitleRegExp = /\\smalltitle\(([\s\S]*)\)/;
 const parRegExp = /\\par/;
 const lfRegExp = /\\\\/;
+const divRegExp = /\\beginbox\(([\s\S]*)\)/;
+const divEndRegExp = /\\endbox\(\)/;
 export default class essayCodeParser {
     root = null;
     currentFontStyle = new fontStyle();
@@ -69,6 +67,7 @@ export default class essayCodeParser {
     }
 
     parse(essayCode) {
+        this.currentFontStyle = this.defaultFontStyle.copy();
         this.essayCode = essayCode;
         this.root = new div();
         let spanBegin = 0;
@@ -77,18 +76,6 @@ export default class essayCodeParser {
         let isInFormula = false;
         let result = {};
         while ((result = allSequenceRegExp.exec(essayCode))) {
-            console.log(result);
-            console.log(
-                "processing " +
-                    result[0] +
-                    " at " +
-                    result.index +
-                    ", current SpanBegin is " +
-                    spanBegin,
-                "isInCode is " + isInCode,
-                "isInInlineCode is " + isInInlineCode,
-                "isInFormula is " + isInFormula
-            );
             if (isInCode) {
                 if (result[0] == "\\CODE") {
                     isInCode = false;
@@ -111,7 +98,6 @@ export default class essayCodeParser {
             }
 
             if (codeRegExp.test(result[0])) {
-                console.log("code detected");
                 this.processCurrentSpan(spanBegin, result.index);
                 isInCode = true;
                 let codeStyle = defaultCodeStyle;
@@ -125,7 +111,6 @@ export default class essayCodeParser {
                 continue;
             }
             if (result[0] == "`") {
-                console.log("inline code detected");
                 this.processCurrentSpan(spanBegin, result.index);
                 isInInlineCode = true;
                 spanBegin = result.index + result[0].length;
@@ -147,7 +132,6 @@ export default class essayCodeParser {
                 continue;
             }
             if (result[0] == "$" || result[0] == "$$") {
-                console.log("formula detected");
                 this.processCurrentSpan(spanBegin, result.index);
                 this.currentSpan = new formula(
                     "",
@@ -159,7 +143,6 @@ export default class essayCodeParser {
                 continue;
             }
             if (setFontRegExp.test(result[0])) {
-                console.log("processing setfont at " + result.index);
                 this.processCurrentSpan(spanBegin, result.index);
                 let arg = result[0].substring(9, result[0].length - 1);
                 let nfontStyle = this.defaultFontStyle.copy();
@@ -176,7 +159,6 @@ export default class essayCodeParser {
                 continue;
             }
             if (imageRegExp.test(result[0])) {
-                console.log("processing image at " + result.index);
                 this.processCurrentSpan(spanBegin, result.index);
                 let arg = result[0].substring(7, result[0].length - 1);
                 let img = new image();
@@ -186,7 +168,6 @@ export default class essayCodeParser {
                 continue;
             }
             if (titleRegExp.test(result[0])) {
-                console.log("processing title at " + result.index);
                 this.processCurrentSpan(spanBegin, result.index);
                 this.currentParagraph = null;
                 let arg = result[0].substring(7, result[0].length - 1);
@@ -196,7 +177,6 @@ export default class essayCodeParser {
                 continue;
             }
             if (smallTitleRegExp.test(result[0])) {
-                console.log("processing smalltitle at " + result.index);
                 this.processCurrentSpan(spanBegin, result.index);
                 this.currentParagraph = null;
                 let arg = result[0].substring(12, result[0].length - 1);
@@ -206,21 +186,40 @@ export default class essayCodeParser {
                 continue;
             }
             if (parRegExp.test(result[0])) {
-                console.log("processing par at " + result.index);
                 this.processCurrentSpan(spanBegin, result.index);
                 this.currentParagraph = null;
                 spanBegin = result.index + result[0].length;
                 continue;
             }
             if (lfRegExp.test(result[0])) {
-                console.log("processing lf at " + result.index);
                 this.processCurrentSpan(spanBegin, result.index);
                 let obj = new br();
                 this.pushToParagraph(obj);
                 spanBegin = result.index + 2;
                 continue;
             }
-            console.log("invalid control sequence");
+            if (divRegExp.test(result[0])) {
+                this.processCurrentSpan(spanBegin, result.index);
+                this.currentParagraph = null;
+                let arg = result[0].substring(10, result[0].length - 1);
+                let divObj = new div(this.currentDiv);
+                let style = new divStyle();
+                style.upgradeFromString(arg);
+                divObj.style = style;
+                this.pushToDiv(divObj);
+                this.currentDiv = divObj;
+                spanBegin = result.index + result[0].length;
+                continue;
+            }
+            if (divEndRegExp.test(result[0])) {
+                this.processCurrentSpan(spanBegin, result.index);
+                this.currentParagraph = null;
+                if (this.currentDiv.parent != null)
+                    this.currentDiv = this.currentDiv.parent;
+                spanBegin = result.index + result[0].length;
+                continue;
+            }
+            console.warn("Invalid control sequence");
         }
         this.processCurrentSpan(spanBegin, essayCode.length);
     }

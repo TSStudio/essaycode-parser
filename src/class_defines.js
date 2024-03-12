@@ -88,11 +88,21 @@ export class divStyle {
     }
     upgradeFromArray(arr) {
         if (arr.length < 1) return;
-        this.width = arr[0];
+        if (arr[0].length) this.width = arr[0];
         if (arr.length < 2) return;
-        this.alignment = arr[1];
+        if (arr[1].length) this.alignment = arr[1];
         if (arr.length < 3) return;
-        this.backgroundColor = arr[2];
+        if (arr[2].length) this.backgroundColor = arr[2];
+    }
+    upgradeFromString(str) {
+        //split by ,
+        str = str.trim();
+        if (str.length == 0) return;
+        let arr = str.split(",");
+        arr.forEach((element) => {
+            element = element.trim();
+        });
+        this.upgradeFromArray(arr);
     }
     generateCSSString() {
         if (this.alignment == "center") {
@@ -376,7 +386,7 @@ export class smallTitle extends abstractParagraphBlock {
     }
     generateDOMElem() {
         let elem = document.createElement("center");
-        let elem2 = document.createElement("h1");
+        let elem2 = document.createElement("h3");
         elem2.innerHTML = this.content;
         elem.appendChild(elem2);
         return elem;
@@ -386,9 +396,10 @@ export class smallTitle extends abstractParagraphBlock {
 export class div {
     paragraphs = [];
     parent;
-    divStyle;
-    constructor(divStyle = defaultDivStyle, parent = null) {
-        this.divStyle = divStyle;
+    style;
+    constructor(parent = null) {
+        this.parent = parent;
+        this.style = defaultDivStyle.copy();
     }
     pushParagraph(paragraph) {
         this.paragraphs.push(paragraph);
@@ -400,7 +411,7 @@ export class div {
         }
         return (
             '<div style="' +
-            this.divStyle.generateCSSString() +
+            this.style.generateCSSString() +
             '">' +
             html +
             "</div>"
@@ -411,7 +422,7 @@ export class div {
         for (let i = 0; i < this.paragraphs.length; i++) {
             elem.appendChild(this.paragraphs[i].generateDOMElem());
         }
-        elem.style = this.divStyle.generateCSSString();
+        elem.style = this.style.generateCSSString();
         return elem;
     }
 }
