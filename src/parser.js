@@ -23,6 +23,7 @@ const lastfontstyle = "";
 const codeRegExp = /^\\CODE(\([a-zA-Z-]*\))?$/g;
 const codeWithLanguageRegExp = /^\\CODE\([a-zA-Z-]+\)$/g;
 const allSequenceRegExp = /(\\[a-zA-Z-\\]+(\([\s\S]*?\))?)|(\${1,2})|(`)/g;
+const setFontRegExp = /\\setfont\(([\s\S]*)\)/g;
 export class essayCodeParser {
     root = null;
     currentFontStyle = new fontStyle();
@@ -32,7 +33,7 @@ export class essayCodeParser {
     essayCode = "";
     pushToDiv(paragraph_like) {
         if (this.currentDiv == null) {
-            this.currentDiv = new div();
+            this.currentDiv = this.root;
             this.root.pushParagraph(this.currentDiv);
         }
         this.currentDiv.pushParagraph(paragraph_like);
@@ -50,6 +51,7 @@ export class essayCodeParser {
         let spanContent = this.essayCode.substring(spanBegin, spanEnd);
         let spanCl = new span(spanContent, this.currentFontStyle.copy());
         this.pushToParagraph(spanCl);
+        this.currentSpan = null;
     }
 
     parse(essayCode) {
@@ -122,6 +124,22 @@ export class essayCodeParser {
                 this.currentSpan = new formula("");
                 this.pushToParagraph(this.currentSpan);
                 spanBegin = result.index;
+                continue;
+            }
+            if (setFontRegExp.test(result[0])) {
+                this.processCurrentSpan(spanBegin, result.index);
+                let arg = result[0].substring(9, result[0].length - 1);
+                let nfontStyle = new fontStyle();
+                nfontStyle.upgradeFromString(arg);
+                if (
+                    this.currentFontStyle.textAlignment !=
+                    nfontStyle.textAlignment
+                ) {
+                    this.pushToParagraph(this.currentSpan);
+                    this.currentParagraph = null;
+                }
+                this.currentFontStyle = nfontStyle;
+                this.spanBegin = result.index + result[0].length;
                 continue;
             }
         }

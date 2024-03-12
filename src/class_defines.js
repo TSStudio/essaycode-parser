@@ -34,6 +34,16 @@ export class fontStyle {
         if (arr.length < 6) return;
         this.fontFamily = arr[5];
     }
+    upgradeFromString(str) {
+        //split by ,
+        str = str.trim();
+        if (str.length == 0) return;
+        let arr = str.split(",");
+        arr.forEach((element) => {
+            element = element.trim();
+        });
+        this.upgradeFromArray(arr);
+    }
     generateCSSString(with_alignment = false) {
         let lastfontstyle =
             "font-size:" +
