@@ -22,17 +22,17 @@ export class fontStyle {
     }
     upgradeFromArray(arr) {
         if (arr.length < 1) return;
-        this.fontSize = arr[0];
+        if (arr[0].length) this.fontSize = arr[0];
         if (arr.length < 2) return;
-        this.fontWeight = arr[1];
+        if (arr[1].length) this.fontWeight = arr[1];
         if (arr.length < 3) return;
-        this.color = arr[2];
+        if (arr[2].length) this.color = arr[2];
         if (arr.length < 4) return;
-        this.textAlignment = arr[3];
+        if (arr[3].length) this.textAlignment = arr[3];
         if (arr.length < 5) return;
-        this.textDecoration = arr[4];
+        if (arr[4].length) this.textDecoration = arr[4];
         if (arr.length < 6) return;
-        this.fontFamily = arr[5];
+        if (arr[5].length) this.fontFamily = arr[5];
     }
     upgradeFromString(str) {
         //split by ,
@@ -219,10 +219,18 @@ export class image extends abstractSpan {
     src;
     relativeSize;
     alt;
-    constructor(src, relativeSize, alt) {
+    constructor(src = "", relativeSize = "100%", alt = "image") {
         this.src = src;
         this.relativeSize = relativeSize;
         this.alt = alt;
+    }
+    upgradeFromString(str) {
+        let arr = str.split(",");
+        this.src = arr[0].trim();
+        if (arr.length < 2) return;
+        this.relativeSize = arr[1].trim();
+        if (arr.length < 3) return;
+        this.alt = arr[2].trim();
     }
     generateHTML() {
         return (

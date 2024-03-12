@@ -24,6 +24,7 @@ const codeRegExp = /^\\CODE(\([a-zA-Z-]*\))?$/g;
 const codeWithLanguageRegExp = /^\\CODE\([a-zA-Z-]+\)$/g;
 const allSequenceRegExp = /(\\[a-zA-Z-\\]+(\([\s\S]*?\))?)|(\${1,2})|(`)/g;
 const setFontRegExp = /\\setfont\(([\s\S]*)\)/g;
+const imageRegExp = /\\image\(([\s\S]*)\)/g;
 export class essayCodeParser {
     root = null;
     currentFontStyle = new fontStyle();
@@ -139,6 +140,14 @@ export class essayCodeParser {
                     this.currentParagraph = null;
                 }
                 this.currentFontStyle = nfontStyle;
+                this.spanBegin = result.index + result[0].length;
+                continue;
+            }
+            if (imageRegExp.test(result[0])) {
+                this.processCurrentSpan(spanBegin, result.index);
+                let arg = result[0].substring(7, result[0].length - 1);
+                let img = new image(arg);
+                this.pushToParagraph(img);
                 this.spanBegin = result.index + result[0].length;
                 continue;
             }
