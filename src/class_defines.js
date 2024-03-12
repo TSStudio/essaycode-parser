@@ -148,10 +148,22 @@ export const defaultDivStyle = new divStyle();
 export class abstractSpan {
     parent;
 }
+export class br extends abstractSpan {
+    constructor() {
+        super();
+    }
+    generateHTML() {
+        return "<br>";
+    }
+    generateDOMElem() {
+        return document.createElement("br");
+    }
+}
 export class span extends abstractSpan {
     content;
     fontstyle;
     constructor(content, fontstyle) {
+        super();
         this.content = content;
         this.fontstyle = fontstyle;
     }
@@ -175,34 +187,46 @@ export class inlineCode extends abstractSpan {
     content;
     codeStyle;
     constructor(content, codeStyle = defaultCodeStyle) {
+        super();
         this.content = content;
         this.codeStyle = codeStyle;
+    }
+    escapeHTML(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
     generateHTML() {
         return (
             "<span style='" +
             this.codeStyle.generateCSSString() +
             "'>" +
-            this.content +
+            this.escapeHTML(this.content) +
             "</span>"
         );
     }
     generateDOMElem() {
         let elem = document.createElement("span");
         elem.style = this.codeStyle.generateCSSString();
-        elem.innerHTML = this.content;
+        elem.innerHTML = this.escapeHTML(this.content);
         return elem;
     }
 }
 export class formula extends abstractSpan {
     content;
-    constructor(content) {
+    fontStyle;
+    constructor(content, fontStyle = new fontStyle()) {
+        super();
         this.content = content;
+        this.fontStyle = fontStyle;
     }
     generateHTML() {
         return (
             "<span style='" +
-            this.fontstyle.generateCSSString() +
+            this.fontStyle.generateCSSString() +
             "'>" +
             this.content +
             "</span>"
@@ -210,7 +234,7 @@ export class formula extends abstractSpan {
     }
     generateDOMElem() {
         let elem = document.createElement("span");
-        elem.style = this.fontstyle.generateCSSString();
+        elem.style = this.fontStyle.generateCSSString();
         elem.innerHTML = this.content;
         return elem;
     }
@@ -220,6 +244,7 @@ export class image extends abstractSpan {
     relativeSize;
     alt;
     constructor(src = "", relativeSize = "100%", alt = "image") {
+        super();
         this.src = src;
         this.relativeSize = relativeSize;
         this.alt = alt;
@@ -238,7 +263,7 @@ export class image extends abstractSpan {
             this.src +
             "' alt='" +
             this.alt +
-            "style='width:" +
+            "' style='width:" +
             this.relativeSize +
             ";'>"
         );
@@ -258,6 +283,7 @@ export class paragraph extends abstractParagraphBlock {
     textAlignment;
     spans = [];
     constructor(textAlignment) {
+        super();
         this.textAlignment = textAlignment;
     }
     pushSpan(span) {
@@ -268,14 +294,20 @@ export class paragraph extends abstractParagraphBlock {
         for (let i = 0; i < this.spans.length; i++) {
             html += this.spans[i].generateHTML();
         }
-        return "<p>" + html + "</p>";
+        return (
+            '<p style="text-indent:2em;text-align:' +
+            this.textAlignment +
+            '">' +
+            html +
+            "</p>"
+        );
     }
     generateDOMElem() {
         let elem = document.createElement("p");
         for (let i = 0; i < this.spans.length; i++) {
             elem.appendChild(this.spans[i].generateDOMElem());
         }
-        elem.style = "text-align:" + this.textAlignment + ";";
+        elem.style = "text-indent:2em;text-align:" + this.textAlignment + ";";
         return elem;
     }
 }
@@ -283,16 +315,26 @@ export class blockCode extends abstractParagraphBlock {
     language = "";
     content = "";
     constructor(type, language, content) {
+        super();
         this.type = type;
         this.language = language;
         this.content = content;
+    }
+    escapeHTML(unsafe) {
+        unsafe = unsafe.replace(/^\s*/, "");
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
     generateHTML() {
         return (
             '<pre style="width:100%;overflow-x:auto;"><code class="language-' +
             this.language +
-            ">" +
-            this.content +
+            '">' +
+            this.escapeHTML(this.content) +
             "</code></pre>"
         );
     }
@@ -301,7 +343,7 @@ export class blockCode extends abstractParagraphBlock {
         elem.style = "width:100%;overflow-x:auto;";
         let elem2 = document.createElement("code");
         elem2.classList.add("language-" + this.language);
-        elem2.innerHTML = this.content;
+        elem2.innerHTML = this.escapeHTML(this.content);
         elem.appendChild(elem2);
         return elem;
     }
@@ -309,6 +351,7 @@ export class blockCode extends abstractParagraphBlock {
 export class title extends abstractParagraphBlock {
     content = "";
     constructor(content) {
+        super();
         this.content = content;
     }
     generateHTML() {
@@ -325,6 +368,7 @@ export class title extends abstractParagraphBlock {
 export class smallTitle extends abstractParagraphBlock {
     content = "";
     constructor(content) {
+        super();
         this.content = content;
     }
     generateHTML() {
