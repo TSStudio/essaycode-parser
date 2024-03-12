@@ -58,7 +58,7 @@ export default class essayCodeParser {
                 " is " +
                 this.essayCode.substring(spanBegin, spanEnd)
         );
-        if (spanBegin == spanEnd - 1) return;
+        if (spanBegin == spanEnd) return;
         if (/^\s*$/.test(this.essayCode.substring(spanBegin, spanEnd))) return;
         let spanContent = this.essayCode.substring(spanBegin, spanEnd);
         let spanCl = new span(spanContent, this.currentFontStyle.copy());
