@@ -14,7 +14,8 @@ import {
     div,
 } from "./class_defines";
 
-const essayCodeParserVersion = "2.0.2";
+//get node package version
+const essayCodeParserVersion = "2.0.3";
 const essayCodeVersion = "1.1";
 
 const codeRegExp = /^\\CODE(\([a-zA-Z-]*\))?$/;
